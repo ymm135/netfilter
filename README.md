@@ -20,6 +20,11 @@ The netfilter hooks are a framework inside the Linux kernel that allows kernel m
 
 [**nftables**]() is the successor of iptables, it allows for much more flexible, scalable and performance packet classification. This is where all the fancy new features are developed.
 
+---
+git仓库及log  
+- ### http://git.netfilter.org/iptables/
+- ### https://git.kernel.org/pub/scm/linux/kernel/git/pablo/nf-next.git
+
 - #### 主要特点  
 
 无状态数据包过滤（IPv4 和 IPv6）  
