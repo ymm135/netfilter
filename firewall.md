@@ -1,5 +1,5 @@
 - # 防火墙  
-
+[防火墙国标37933](https://www.wangan.com/docs/gbt37933-2019)  
 ## iptables
 
 Simply put, iptables is a firewall program for Linux. It will monitor traffic from and to your server using `tables`. These tables contain sets of `rules`, called `chains`, that will filter `incoming` and `outgoing` data packets.
@@ -463,13 +463,38 @@ VLAN=yes
 
 
 ### ipv6 隧道
+Tunnel /ˈtʌn(ə)l/ 隧道  
 <br>
 <div align=center>
     <img src="res/images/隧道.png" width="80%"></img>  
 </div>
 <br>
 
+#### 产生原因
+在IPv4网络向IPv6网络过渡后期，IPv6网络已被大量部署，而IPv4网络只是被IPv6网络隔离开的局部网络。采用专用的线路将这些IPv4网络互连起来，显然是不经济的，通常的做法是采用隧道技术。利用隧道技术可以在IPv6网络上创建隧道，使IPv4网络能通过IPv6公网访问其他IPv4网络，从而实现IPv4网络之间的互连，这种隧道称为IPv4 over IPv6隧道。
+
+#### IPv4 over IPv6隧道的报文头
+为确保IPv4报文可以在IPv6网络中传输，需要为IPv4报文添加IPv6报文头，以封装成IPv6报文，IPv6报文头格式由标准协议定义，如图3-1所示。
+
+图3-1 IPv6报文头格式
+
+<br>
+<div align=center>
+    <img src="res/images/ipv4-ipv6-struct.png" width="80%"></img>  
+</div>
+<br>
+
+下面举例说明 hostname6.ip.tun0 文件中的各项：
+```shell
+tsrc 10.10.10.23 tdst 172.16.7.19 up
+addif 2001:db8:3b4c:1:5678:5678::2 up
+```
+
+在此示例中，源和目标 IPv4 地址用作自动配置 IPv6 链路本地地址的标记。这些地址分别是 ip.tun0 接口的源和目标。配置了两个接口。配置了 ip.tun0 接口。还配置了一个逻辑接口 ip.tun0:1。该逻辑接口的源和目标 IPv6 地址由 addif 命令指定。  s
+
 ### ipsec VPN  
+
+[github搭建ipsec vpn](https://github.com/hwdsl2/setup-ipsec-vpn/blob/master/README-zh.md)  
 
 <br>
 <div align=center>
@@ -477,15 +502,119 @@ VLAN=yes
 </div>
 <br>
 
+使用 Linux 脚本一键快速搭建自己的 IPsec VPN 服务器。支持 IPsec/L2TP, Cisco IPsec 和 IKEv2 协议。
+
+IPsec VPN 可以加密你的网络流量，以防止在通过因特网传送时，你和 VPN 服务器之间的任何人对你的数据的未经授权的访问。在使用不安全的网络时，这是特别有用的，例如在咖啡厅，机场或旅馆房间。
+
+我们将使用 Libreswan 作为 IPsec 服务器，以及 xl2tpd 作为 L2TP 提供者。
+
+#### ubuntu搭建
+
+```shell
+sudo apt-get update && sudo apt-get dist-upgrade
+```
+
+编辑脚本并提供你自己的 VPN 登录凭证。
+
+```shell
+wget https://get.vpnsetup.net -O vpn.sh
+nano -w vpn.sh
+[替换为你自己的值： YOUR_IPSEC_PSK, YOUR_USERNAME 和 YOUR_PASSWORD]
+sudo sh vpn.sh
+```
+
+> 预共享密钥 (PSK) 是一种客户端身份验证方法，它使用一串 64 位十六进制数字或作为 8 到 63 个可打印 ASCII 字符的密码，为每个无线客户端生成唯一的加密密钥。PSK 是瞻博网络无线网络上用于 WPA 和 WPA2 加密的两种可用身份验证方法之一。PSK 不是创建 WLAN 服务配置文件时的默认身份验证方法，因为另一种选择 802.1X 身份验证是标准且更强大。  
+
+YOUR_IPSEC_PSK='qwerasdfzxcv'  
+YOUR_USERNAME='tzz'  
+YOUR_PASSWORD='qwertyuiop'   
+
+
+安装成功日志
+```shell
++ wget -t 3 -T 30 -q -O /tmp/vpn.XFS4y/vpn.sh https://github.com/hwdsl2/setup-ipsec-vpn/raw/master/vpnsetup_ubuntu.sh
++ wget -t 3 -T 30 -q -O /tmp/vpn.XFS4y/vpn.sh https://gitlab.com/hwdsl2/setup-ipsec-vpn/-/raw/master/vpnsetup_ubuntu.sh
+## VPN setup in progress... Please be patient.
+## Installing packages required for setup...
++ apt-get -yqq update
++ apt-get -yqq install wget dnsutils openssl iptables iproute2 gawk grep sed net-tools
+## Trying to auto discover IP of this server...
+## Installing packages required for the VPN...
++ apt-get -yqq install libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison gcc make libnss3-tools libevent-dev libsystemd-dev uuid-runtime ppp xl2tpd
+## Installing Fail2Ban to protect SSH...
++ apt-get -yqq install fail2ban
+## Downloading helper scripts...
++ ikev2.sh addvpnuser.sh delvpnuser.sh 
+## Libreswan 4.7 is already installed, skipping...
+## Creating VPN configuration...
+## Updating sysctl settings...
+## Updating IPTables rules...
+## Enabling services on boot...
+## Starting services...
+
+================================================
+
+IPsec VPN server is now ready for use!
+
+Connect to your new VPN with these details:
+
+Server IP: 84.17.41.94
+IPsec PSK: qwerasdfzxcv
+Username: tzz
+Password: qwertyuiop
+
+Write these down. You'll need them to connect!
+
+VPN client setup: https://vpnsetup.net/clients
+
+================================================
+
+================================================
+
+IKEv2 setup successful. Details for IKEv2 mode:
+
+VPN server address: 84.17.41.94
+VPN client name: vpnclient
+
+Client configuration is available at:
+/root/vpnclient.p12 (for Windows & Linux)
+/root/vpnclient.sswan (for Android)
+/root/vpnclient.mobileconfig (for iOS & macOS)
+
+Next steps: Configure IKEv2 clients. See:
+https://vpnsetup.net/clients
+
+================================================
+```
+
+把配置文件导出到mac,文件名称变为`vpnclient.mobileconfig`, 双击文件，提示描述文件安装，请在`系统偏好设置`中检查该描述文件。  
+
+<br>
+<div align=center>
+    <img src="res/images/macos-profiles.png" width="60%"></img>  
+</div>
+<br>
+
+<br>
+<div align=center>
+    <img src="res/images/macos-vpn.png" width="60%"></img>  
+</div>
+<br>
+
+
+
 ### ALG 
 
 应用层网关（英语：Application Layer Gateway，或application-level gateway，缩写为ALG） 是一种NAT穿透技术。就应用层面来说，它允许修改匣道上的`NAT traversal`的过滤规则，完成特定网络传输协议上的地址和端口的转换。举例来说，像FTP、BitTorrent、SIP、RTSP、IPsec、L2TP、H.323，这些都可以使用ALG来针对应用程序在地址及端口转换上的需求。在RFC 2663中定义了这个功能。  
+
+应用层网关（也称为应用代理网关）可以在基础设施的应用层执行各种功能，通常称为 OSI 模型中的第 7 层。这些功能可能包括地址和端口转换、资源分配、应用程序响应控制以及数据和控制流量的同步。通过充当应用服务器的代理并管理SIP和 FTP 等应用协议，应用层网关可以控制应用会话的启动，并通过在适当的时候阻止或终止连接来保护应用服务器，以提供应用层安全性。
 
 <br>
 <div align=center>
     <img src="res/images/alg.png" width="80%"></img>  
 </div>
 <br>
+
 
 
 ### url过滤
@@ -494,4 +623,17 @@ VLAN=yes
     <img src="res/images/alg.png" width="80%"></img>  
 </div>
 <br>
+
+
+### DPI 
+深度数据包检测（英语：`Deep packet inspection`，缩写为 `DPI`），又称完全数据包探测（complete packet inspection）或信息萃取（Information eXtraction，IX），是一种电脑网络数据包过滤技术，用来检查通过检测点数据包的资料部分（也可能包含其标头），以搜索不符合规范的协议、病毒、垃圾邮件、入侵，或以预定准则来决定数据包是否可通过或需被路由至其他不同目的地，或是为了收集统计资料。IP数据包有许多个标头；正常运作下，网络设备只需要使用第一个标头（IP标头），而使用到第二个标头（TCP、UDP等）则通常会与深度数据包检测相对，而被称为浅度数据包检测（一般称为状态防火墙）[1]。有多种方式可以用来获取深度数据包检测的数据包。较常见的方法有端口镜像（port mirroring，或称为 Span Port）及光纤分光器。
+
+深度数据包检测允许进一步的网络管理、用户服务及安全功能，也可用于进行互联网数据挖掘、窃听及互联网审查。虽然深度数据包检测技术已被用于互联网管理许多年，一些支持网络中立性的人害怕此技术会被用于反竞争行为，或减少网络的开放性[2]。寻求反制的技术也因而被提出来大规模讨论。由于深度数据包检测的应用范围广泛，可分成企业（公司及大型机构）、电信服务业者及政府3个方面进行说明[3]。  
+
+
+深度数据包检测结合了入侵检测系统（IDS）、入侵预防系统（IPS）及状态防火墙等功能[4]。此一结合让深度数据包检测可以检测到某些IDS、IPS或状态防火墙都无法发觉的攻击。状态防火墙能看到数据包流的开始与结束，但不能发现超过特定应用范围的事件。IDS能检测入侵，但几乎没有阻挡此类攻击的能力。深度数据包检测能用来快速阻挡来自病毒与蠕虫的攻击。更具体地说，深度数据包检测可有效防止缓冲器溢出攻击、DDoS攻击、复杂入侵及少部分置于单一数据包内的蠕虫。
+
+具有深度数据包检测的设备可以看到OSI模型的第2层及第3层之后。在某些情况下，深度数据包检测可用来分析OSI模型的第2层至第7层。这包括了整个标头、资料协议架构及消息的负载。深度数据包检测功能在设备采取其他行动时，依据OSI模型第3层之后的信息被引用。深度数据包检测可以依据包含由数据包资料部分摘取出之信息的特征数据库，识别并分类讯务，从而允许比仅依据标头信息分类有更精确的控制。在许多情况下，终端可使用加密及混淆技术来规避深度数据包检测。
+
+一个被分类的数据包可能被重定向、标记/标签（见QoS）、屏蔽、速限，并且反馈给网络中的报告程序（reporting agent）。在此方式下，不同分类的HTTP错误会被识别，并被转交分析。许多具有深度数据包检测的设备会识别数据包流（而非逐个数据包的分析），允许依据累积的流量信息进行控制。
 
