@@ -620,7 +620,7 @@ https://vpnsetup.net/clients
 ### url过滤
 <br>
 <div align=center>
-    <img src="res/images/alg.png" width="80%"></img>  
+    <img src="res/images/url.png" width="80%"></img>  
 </div>
 <br>
 
